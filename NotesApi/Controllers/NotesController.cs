@@ -10,10 +10,10 @@ namespace NotesApi.Controllers
     public class NotesController : ControllerBase
     {
         static List<Notes> _notes = new List<Notes> { new Notes { Id = new System.Guid("2c0332ca-6f03-41a3-b331-aebc7f932f9a"), CategoryId = "1", OwnerId = new System.Guid("b081f808-7482-4bac-9733-8ffee3e4e1d9"), Title = "First Note", Description = "First Note Description" },
-        new Notes { Id = new System.Guid("eac5067d-bb12-4458-8b9e-e6c545e43f7d"), CategoryId = "1", OwnerId = new System.Guid(), Title = "Second Note", Description = "Second Note Description" },
-        new Notes { Id = new System.Guid("e8d26c47-1e9c-4429-a914-728617f32aab"), CategoryId = "3", OwnerId = new System.Guid(), Title = "Third Note", Description = "Third Note Description" },
-        new Notes { Id = new System.Guid(), CategoryId = "2", OwnerId = new System.Guid(), Title = "Fourth Note", Description = "Fourth Note Description" },
-        new Notes { Id = new System.Guid(), CategoryId = "1", OwnerId = new System.Guid(), Title = "Fifth Note", Description = "Fifth Note Description" }
+        new Notes { Id = Guid.NewGuid(), CategoryId = "1", OwnerId = new System.Guid(), Title = "Second Note", Description = "Second Note Description" },
+        new Notes { Id = Guid.NewGuid(), CategoryId = "3", OwnerId = new System.Guid(), Title = "Third Note", Description = "Third Note Description" },
+        new Notes { Id = Guid.NewGuid(), CategoryId = "2", OwnerId = new System.Guid(), Title = "Fourth Note", Description = "Fourth Note Description" },
+        new Notes { Id = Guid.NewGuid(), CategoryId = "1", OwnerId = new System.Guid(), Title = "Fifth Note", Description = "Fifth Note Description" }
         };
 
 
@@ -69,7 +69,7 @@ namespace NotesApi.Controllers
         /// <param name="note"></param>
         /// <returns>See headers for url location of resources</returns>
         [HttpPost("Create")]
-        public ActionResult<Notes> CreateWhitMethod([FromBody] Notes note)
+        public ActionResult<Notes> CreateWhithMethod([FromBody] Notes note)
         {
             if (note == null)
             {
@@ -81,7 +81,60 @@ namespace NotesApi.Controllers
             return CreatedAtRoute("GetNoteById", new { id = note.Id }, note);
         }
 
+        [HttpPut("{id}")]
+        public IActionResult UpdateNote(Guid id, [FromBody] Notes noteToUpdate)
+        {
+            if (noteToUpdate == null)
+            {
+                return BadRequest("Note cannot be null");
+            }
 
+            var index = _notes.FindIndex(note => note.Id == id);
+
+            if (index == -1)
+            {
+                return NotFound();
+            }
+
+            noteToUpdate.Id = _notes[index].Id;
+            _notes[index] = noteToUpdate;
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteNote(Guid id)
+        {
+            var index = _notes.FindIndex(note => note.Id == id);
+
+            if (index == -1)
+            {
+                return NotFound();
+            }
+
+            _notes.RemoveAt(index);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/title")]
+        public IActionResult UpdateTitleNote(Guid id, [FromBody] string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                return BadRequest("The string cannot be null");
+            }
+
+            var index = _notes.FindIndex(note => note.Id == id);
+
+            if (index == -1)
+            {
+                return NotFound();
+            }
+
+            _notes[index].Title = title;
+            return Ok(_notes[index]);
+        }
 
 
         /// <summary>

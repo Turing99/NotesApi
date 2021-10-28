@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NotesApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace NotesApi.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    public class CategoriesController : Controller
+    public class CategoriesController : ControllerBase
     {
         List<Category> categories = new List<Category>()
         {
@@ -27,7 +26,7 @@ namespace NotesApi.Controllers
         /// <response code="400">Bad request</response>
         /// <returns></returns>
         /// 
-        [HttpGet("GetCategories")]
+        [HttpGet]
         public IActionResult GetCategories()
         {
             return Ok(categories);
@@ -46,15 +45,13 @@ namespace NotesApi.Controllers
         public IActionResult GetCategoryById(Guid id)
         {
 
-            Category category = categories.Find(category => category.Id == id);
+            Category category = categories.FirstOrDefault(category => category.Id == id);
             if (category == null)
             {
                 return BadRequest("Did not find the category with the id specified");
             }
 
             return Ok(category);
-
-
         }
 
         /// <summary>
@@ -64,11 +61,20 @@ namespace NotesApi.Controllers
         /// <response code="201">Created</response>
         /// <response code="500">Internal Server Error</response>
         /// <returns></returns>
-        [HttpPost("")]
+        [HttpPost]
         public IActionResult AddCategory([FromBody] Category bodyContent)
         {
-            categories.Add(bodyContent);
-            return Ok(categories);
+
+            Category category = categories.FirstOrDefault(category => category.Id == bodyContent.Id);
+
+            if (category == null)
+            {
+                categories.Add(bodyContent);
+
+                return Ok(categories);
+            }
+
+            return BadRequest("Duplicate Id");
 
         }
 
@@ -81,7 +87,7 @@ namespace NotesApi.Controllers
         public IActionResult DeleteCategory(Guid id)
         {
 
-            Category category = categories.Find(category => category.Id == id);
+            Category category = categories.FirstOrDefault(category => category.Id == id);
             if (category == null)
             {
                 return BadRequest("Category was not found!");

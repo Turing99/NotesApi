@@ -3,11 +3,16 @@
     using Microsoft.AspNetCore.Mvc;
     using NotesApi.Models;
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Defines the <see cref="OwnerController" />.
     /// </summary>
-    public class OwnerController : Controller
+    /// 
+
+    [ApiController]
+    [Route("[controller]")]
+    public class OwnerController : ControllerBase
     {
         /// <summary>
         /// Defines the owners.
@@ -24,7 +29,7 @@
         /// The GetAllOwners.
         /// </summary>
         /// <returns>The <see cref="IActionResult"/>.</returns>
-        [HttpGet("GetAllOwners")]
+        [HttpGet]
         public IActionResult GetAllOwners()
         {
             return Ok(owners);
@@ -35,11 +40,19 @@
         /// </summary>
         /// <param name="bodyContent">The bodyContent<see cref="Owner"/>.</param>
         /// <returns>The <see cref="IActionResult"/>.</returns>
-        [HttpPost("")]
+        [HttpPost]
         public IActionResult AddOwner([FromBody] Owner bodyContent)
         {
-            owners.Add(bodyContent);
-            return Ok(owners);
+            Owner owner = owners.FirstOrDefault(o => o.Id == bodyContent.Id);
+
+            if (owner == null)
+            {
+                owners.Add(bodyContent);
+                return Ok(owners);
+            }
+
+            return BadRequest("Duplicate Id");
+
         }
     }
 }
