@@ -11,10 +11,9 @@ namespace NotesApi.Controllers
     {
         List<Category> categories = new List<Category>()
         {
-           new Category(){ Id = new Guid("75e4aa03-26bb-4443-a01c-ebeb1c44a404"), Name ="To do"},
-           new Category(){ Id = new System.Guid("e9886d05-9f08-424f-9477-3490a33880c3"), Name ="Doing"},
-           new Category(){ Id = new System.Guid(), Name = "Done"}
-
+           new Category(){ Id = Guid.NewGuid(), Name ="To do"},
+           new Category(){ Id = Guid.NewGuid(), Name ="Doing"},
+           new Category(){ Id = Guid.NewGuid(), Name = "Done"}
         };
 
         public CategoriesController() { }
@@ -44,8 +43,7 @@ namespace NotesApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetCategoryById(Guid id)
         {
-
-            Category category = categories.FirstOrDefault(category => category.Id == id);
+            Category category = categories.FirstOrDefault(category => category.Id.Equals(id));
             if (category == null)
             {
                 return BadRequest("Did not find the category with the id specified");
@@ -64,8 +62,7 @@ namespace NotesApi.Controllers
         [HttpPost]
         public IActionResult AddCategory([FromBody] Category bodyContent)
         {
-
-            Category category = categories.FirstOrDefault(category => category.Id == bodyContent.Id);
+            Category category = categories.FirstOrDefault(category => category.Id.Equals(bodyContent.Id));
 
             if (category == null)
             {
@@ -75,7 +72,6 @@ namespace NotesApi.Controllers
             }
 
             return BadRequest("Duplicate Id");
-
         }
 
         /// <summary>
@@ -86,12 +82,10 @@ namespace NotesApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteCategory(Guid id)
         {
-
-            Category category = categories.FirstOrDefault(category => category.Id == id);
+            Category category = categories.FirstOrDefault(category => category.Id.Equals(id));
             if (category == null)
             {
                 return BadRequest("Category was not found!");
-
             }
 
             categories.RemoveAt(categories.IndexOf(category));

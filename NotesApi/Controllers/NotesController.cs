@@ -41,7 +41,7 @@ namespace NotesApi.Controllers
         [HttpGet("OwnerId/{id}")]
         public IActionResult GetByOwnerId(Guid id)
         {
-            List<Notes> note = _notes.FindAll(note => note.OwnerId == id);
+            List<Notes> note = _notes.FindAll(note => note.OwnerId.Equals(id));
 
             return Ok(note);
         }
@@ -55,7 +55,7 @@ namespace NotesApi.Controllers
         public IActionResult GetNoteById(Guid id)
         {
 
-            List<Notes> note = _notes.FindAll(note => note.Id == id);
+            List<Notes> note = _notes.FindAll(note => note.Id.Equals(id));
             if (note == null)
             {
                 return BadRequest("Note was not found");
@@ -89,7 +89,7 @@ namespace NotesApi.Controllers
                 return BadRequest("Note cannot be null");
             }
 
-            var index = _notes.FindIndex(note => note.Id == id);
+            var index = _notes.FindIndex(note => note.Id.Equals(id));
 
             if (index == -1)
             {
@@ -105,7 +105,7 @@ namespace NotesApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteNote(Guid id)
         {
-            var index = _notes.FindIndex(note => note.Id == id);
+            var index = _notes.FindIndex(note => note.Id.Equals(id));
 
             if (index == -1)
             {
@@ -125,7 +125,7 @@ namespace NotesApi.Controllers
                 return BadRequest("The string cannot be null");
             }
 
-            var index = _notes.FindIndex(note => note.Id == id);
+            var index = _notes.FindIndex(note => note.Id.Equals(id));
 
             if (index == -1)
             {
