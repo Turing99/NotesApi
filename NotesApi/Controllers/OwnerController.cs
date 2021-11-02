@@ -2,9 +2,10 @@
 {
     using Microsoft.AspNetCore.Mvc;
     using NotesApi.Models;
+    using NotesApi.Services;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the <see cref="OwnerController" />.
@@ -13,25 +14,26 @@
     [Route("[controller]")]
     public class OwnerController : ControllerBase
     {
-        /// <summary>
-        /// Defines the owners.
-        /// </summary>
-        static List<Owner> owners = new List<Owner>()
-        {
-           new Owner(){ Id = Guid.NewGuid(), Name ="Georgel"},
-           new Owner(){ Id = Guid.NewGuid(), Name ="Ivanovici"},
-           new Owner(){ Id = Guid.NewGuid(), Name = "Mache"}
 
-        };
+        readonly IOwnerCollectionService _ownerCollectionService;
+
+
+        public OwnerController(IOwnerCollectionService ownerCollectionService)
+        {
+            _ownerCollectionService = ownerCollectionService;
+        }
 
         /// <summary>
         /// The GetAllOwners.
         /// </summary>
         /// <returns>The <see cref="IActionResult"/>.</returns>
         [HttpGet]
-        public IActionResult GetAllOwners()
+        public async Task<IActionResult> GetAllOwners()
         {
+
+            List<Owner> owners = await _ownerCollectionService.GetAll();
             return Ok(owners);
+
         }
 
         /// <summary>
@@ -40,17 +42,20 @@
         /// <param name="bodyContent">The bodyContent<see cref="Owner"/>.</param>
         /// <returns>The <see cref="IActionResult"/>.</returns>
         [HttpPost]
-        public IActionResult AddOwner([FromBody] Owner bodyContent)
+        public async Task<IActionResult> AddOwner([FromBody] Owner bodyContent)
         {
-            Owner owner = owners.FirstOrDefault(o => o.Id.Equals(bodyContent.Id));
 
-            if (owner == null)
+            if (bodyContent == null)
             {
-                owners.Add(bodyContent);
-                return Ok(owners);
+                return BadRequest("Owner cannot be null");
             }
 
-            return BadRequest("Duplicate Id");
+            if (await _ownerCollectionService.Create(bodyContent))
+            {
+                return Ok();
+            }
+
+            return NoContent();
         }
 
         /// <summary>
@@ -59,15 +64,14 @@
         /// <param name="id">.</param>
         /// <returns>.</returns>
         [HttpDelete("{id}")]
-        public IActionResult DeleteOwner(Guid id)
+        public async Task<IActionResult> DeleteOwner(Guid id)
         {
-            var index = owners.FindIndex(owner => owner.Id.Equals(id));
+            var index = await _ownerCollectionService.Delete(id);
 
-            if (index == -1)
+            if (index == false)
             {
                 return NotFound();
             }
-            owners.RemoveAt(index);
 
             return NoContent();
         }
@@ -79,22 +83,19 @@
         /// <param name="ownerToUpdate">The ownerToUpdate<see cref="Owner"/>.</param>
         /// <returns>The <see cref="IActionResult"/>.</returns>
         [HttpPut("{id}")]
-        public IActionResult UpdateOwner(Guid id, [FromBody] Owner ownerToUpdate)
+        public async Task<IActionResult> UpdateOwner(Guid id, [FromBody] Owner ownerToUpdate)
         {
             if (ownerToUpdate == null)
             {
                 return BadRequest("Note cannot be null");
             }
 
-            var index = owners.FindIndex(owner => owner.Id.Equals(id));
+            var index = await _ownerCollectionService.Update(id, ownerToUpdate);
 
-            if (index == -1)
+            if (index == false)
             {
                 return NotFound();
             }
-
-            ownerToUpdate.Id = owners[index].Id;
-            owners[index] = ownerToUpdate;
 
             return NoContent();
         }

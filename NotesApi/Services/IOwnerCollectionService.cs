@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace NotesApi.Services
 {
-    public interface INoteCollectionService : ICollectionService<Notes>
+    public interface IOwnerCollectionService : ICollectionService<Owner>
     {
         Task<List<Notes>> GetNotesByOwnerId(Guid ownerId);
     }
